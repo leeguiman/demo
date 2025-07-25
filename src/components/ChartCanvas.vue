@@ -34,6 +34,14 @@
     
     <!-- 图表预览页签 -->
     <div :class="['chart-container', { fullscreen: isFullscreen }]">
+      <!-- 全屏模式下的控制栏 -->
+      <div v-if="isFullscreen" class="fullscreen-controls">
+        <h3>图表预览 - 全屏模式</h3>
+        <button @click="toggleFullscreen" class="exit-fullscreen-button">
+          退出全屏
+        </button>
+      </div>
+      
       <div v-show="activeTab === 'chart'" class="tab-content chart-tab">
         <div ref="g2ChartMountPoint" class="g2-chart-mount"></div>
         <div v-if="!hasChart" class="empty-state">
@@ -337,6 +345,41 @@ defineExpose({
   background: #ffffff;
   border-radius: 0;
   border: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.fullscreen-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+  flex-shrink: 0;
+}
+
+.fullscreen-controls h3 {
+  margin: 0;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.exit-fullscreen-button {
+  background: #ff4757;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.exit-fullscreen-button:hover {
+  background: #ff3742;
 }
 
 .tab-content {
@@ -372,6 +415,8 @@ defineExpose({
 
 .chart-container.fullscreen .empty-state {
   position: fixed;
+  top: 60px;
+  height: calc(100vh - 60px);
 }
 
 .empty-icon {
