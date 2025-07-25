@@ -135,7 +135,9 @@ const toggleFullscreen = () => {
   // 全屏切换后需要重新调整图表大小
   if (currentChart) {
     setTimeout(() => {
+      // 强制图表重新计算容器大小并适应
       currentChart?.forceFit()
+      currentChart?.render()
     }, 100)
   }
 }
@@ -161,8 +163,14 @@ const executeCode = (code: string) => {
         const container = arguments[0];
         const Chart = arguments[1];
         
-        ${code}
+        // 重写用户代码中的固定尺寸设置
+        const originalCode = \`${code}\`;
+        const modifiedCode = originalCode
+          .replace(/width:\\s*\\d+/g, 'autoFit: true')
+          .replace(/height:\\s*\\d+/g, 'autoFit: true')
+          .replace(/container:\\s*['"]container['"]/, 'container: container');
         
+        eval(modifiedCode);
         // 确保返回chart实例
         if (typeof chart !== 'undefined') {
           return chart;
@@ -180,9 +188,13 @@ const executeCode = (code: string) => {
       currentChart = chart
       hasChart.value = true
       
-      // 确保图表自适应容器大小
+      // 确保图表自适应容器大小，特别是在全屏模式下
       setTimeout(() => {
         chart.forceFit()
+        // 如果当前是全屏模式，额外调用一次render确保正确显示
+        if (isFullscreen.value) {
+          chart.render()
+        }
       }, 100)
       
       // 提取图表数据
