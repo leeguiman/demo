@@ -164,7 +164,7 @@ const executeCode = (code: string) => {
       .replace(/container:\s*['"]container['"]/, 'container: container');
     
     // 使用 new Function 创建安全的执行环境
-    const func = new Function('container', 'Chart', 'data', `
+    const func = new Function('container', 'Chart', `
       ${modifiedCode}
       // 确保返回chart实例
       if (typeof chart !== 'undefined') {
@@ -175,7 +175,7 @@ const executeCode = (code: string) => {
     `);
 
     // 执行代码
-    const chart = func(g2ChartMountPoint.value, Chart, undefined)
+    const result = func(g2ChartMountPoint.value, Chart)
     
     if (chart && typeof chart.render === 'function') {
       currentChart = chart
