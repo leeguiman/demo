@@ -40,9 +40,6 @@ const clearCanvas = () => {
   }
   hasChart.value = false
   error.value = ''
-  if (chartContainer.value) {
-    chartContainer.value.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><p>在左侧编辑器中输入AntV代码，然后点击"运行代码"查看效果</p></div>'
-  }
 }
 
 const executeCode = (code: string) => {
