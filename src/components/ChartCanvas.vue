@@ -153,16 +153,27 @@ const executeCode = (code: string) => {
       
       // 提取图表数据
       try {
-        const data = chart.options?.data || []
-        chartData.value = Array.isArray(data) ? data : []
-      } catch (dataError) {
-        console.warn('无法提取图表数据:', dataError)
-        chartData.value = []
-      }
-      
-      // 提取图表数据
-      try {
-        const data = chart.options?.data || []
+        // 尝试多种方式获取图表数据
+        let data = []
+        
+        // 方法1: 从chart.options.data获取
+        if (chart.options && chart.options.data) {
+          data = chart.options.data
+        }
+        // 方法2: 从chart的内部状态获取
+        else if (chart.getOptions && chart.getOptions().data) {
+          data = chart.getOptions().data
+        }
+        // 方法3: 从图表的数据源获取
+        else if (chart.getData && typeof chart.getData === 'function') {
+          data = chart.getData()
+        }
+        // 方法4: 检查是否有spec.data
+        else if (chart.spec && chart.spec.data) {
+          data = chart.spec.data
+        }
+        
+        console.log('提取到的图表数据:', data)
         chartData.value = Array.isArray(data) ? data : []
       } catch (dataError) {
         console.warn('无法提取图表数据:', dataError)
