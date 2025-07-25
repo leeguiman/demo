@@ -157,32 +157,25 @@ const executeCode = (code: string) => {
     // 清空G2图表挂载点
     g2ChartMountPoint.value.innerHTML = ''
     
-    // 创建安全的执行环境
-    const safeCode = `
-      (function() {
-        const container = arguments[0];
-        const Chart = arguments[1];
-        
-        // 重写用户代码中的固定尺寸设置
-        const originalCode = \`${code}\`;
-        const modifiedCode = originalCode
-          .replace(/width:\\s*\\d+/g, 'autoFit: true')
-          .replace(/height:\\s*\\d+/g, 'autoFit: true')
-          .replace(/container:\\s*['"]container['"]/, 'container: container');
-        
-        eval(modifiedCode);
-        // 确保返回chart实例
-        if (typeof chart !== 'undefined') {
-          return chart;
-        } else {
-          throw new Error('代码必须创建并返回一个chart变量');
-        }
-      })
-    `
+    // 重写用户代码中的固定尺寸设置
+    const modifiedCode = code
+      .replace(/width:\s*\d+/g, 'autoFit: true')
+      .replace(/height:\s*\d+/g, 'autoFit: true')
+      .replace(/container:\s*['"]container['"]/, 'container: container');
+    
+    // 使用 new Function 创建安全的执行环境
+    const func = new Function('container', 'Chart', 'data', `
+      ${modifiedCode}
+      // 确保返回chart实例
+      if (typeof chart !== 'undefined') {
+        return chart;
+      } else {
+        throw new Error('代码必须创建并返回一个chart变量');
+      }
+    `);
 
     // 执行代码
-    const func = eval(safeCode)
-    const chart = func(g2ChartMountPoint.value, Chart)
+    const chart = func(g2ChartMountPoint.value, Chart, undefined)
     
     if (chart && typeof chart.render === 'function') {
       currentChart = chart
