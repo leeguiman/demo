@@ -7,6 +7,7 @@
       </button>
     </div>
     <div ref="chartContainer" class="chart-container">
+      <div ref="g2ChartMountPoint" class="g2-chart-mount"></div>
       <div v-if="!hasChart" class="empty-state">
         <div class="empty-icon">📊</div>
         <p>在左侧编辑器中输入AntV代码，然后点击"运行代码"查看效果</p>
@@ -24,6 +25,7 @@ import { ref, onMounted } from 'vue'
 import { Chart } from '@antv/g2'
 
 const chartContainer = ref<HTMLElement>()
+const g2ChartMountPoint = ref<HTMLElement>()
 const hasChart = ref(false)
 const error = ref('')
 
@@ -43,7 +45,7 @@ const clearCanvas = () => {
 }
 
 const executeCode = (code: string) => {
-  if (!chartContainer.value) return
+  if (!g2ChartMountPoint.value) return
 
   try {
     error.value = ''
@@ -54,15 +56,9 @@ const executeCode = (code: string) => {
       currentChart = null
     }
     
-    // 清空容器
-    chartContainer.value.innerHTML = ''
+    // 清空G2图表挂载点
+    g2ChartMountPoint.value.innerHTML = ''
     
-    // 创建新的容器div
-    const chartDiv = document.createElement('div')
-    chartDiv.style.width = '100%'
-    chartDiv.style.height = '100%'
-    chartContainer.value.appendChild(chartDiv)
-
     // 创建安全的执行环境
     const safeCode = `
       (function() {
@@ -77,7 +73,7 @@ const executeCode = (code: string) => {
 
     // 执行代码
     const func = eval(safeCode)
-    const chart = func(chartDiv, Chart)
+    const chart = func(g2ChartMountPoint.value, Chart)
     
     if (chart && typeof chart.render === 'function') {
       currentChart = chart
@@ -153,6 +149,14 @@ defineExpose({
   position: relative;
 }
 
+.g2-chart-mount {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -162,6 +166,11 @@ defineExpose({
   color: #666;
   text-align: center;
   padding: 40px 20px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1;
 }
 
 .empty-icon {
