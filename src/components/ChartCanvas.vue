@@ -177,16 +177,16 @@ const executeCode = (code: string) => {
     // 执行代码
     const result = func(g2ChartMountPoint.value, Chart)
     
-    if (chart && typeof chart.render === 'function') {
-      currentChart = chart
+    if (result && typeof result.render === 'function') {
+      currentChart = result
       hasChart.value = true
       
       // 确保图表自适应容器大小，特别是在全屏模式下
       setTimeout(() => {
-        chart.forceFit()
+        result.forceFit()
         // 如果当前是全屏模式，额外调用一次render确保正确显示
         if (isFullscreen.value) {
-          chart.render()
+          result.render()
         }
       }, 100)
       
@@ -196,20 +196,20 @@ const executeCode = (code: string) => {
         let data = []
         
         // 方法1: 从chart.options.data获取
-        if (chart.options && chart.options.data) {
-          data = chart.options.data
+        if (result.options && result.options.data) {
+          data = result.options.data
         }
         // 方法2: 从chart的内部状态获取
-        else if (chart.getOptions && chart.getOptions().data) {
-          data = chart.getOptions().data
+        else if (result.getOptions && result.getOptions().data) {
+          data = result.getOptions().data
         }
         // 方法3: 从图表的数据源获取
-        else if (chart.getData && typeof chart.getData === 'function') {
-          data = chart.getData()
+        else if (result.getData && typeof result.getData === 'function') {
+          data = result.getData()
         }
         // 方法4: 检查是否有spec.data
-        else if (chart.spec && chart.spec.data) {
-          data = chart.spec.data
+        else if (result.spec && result.spec.data) {
+          data = result.spec.data
         }
         
         console.log('提取到的图表数据:', data)
