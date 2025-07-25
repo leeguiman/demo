@@ -24,8 +24,8 @@
     </div>
     
     <!-- 图表预览页签 -->
-    <div ref="chartContainer" class="chart-container">
-      <div v-show="activeTab === 'chart'" class="tab-content">
+    <div class="chart-container">
+      <div v-show="activeTab === 'chart'" class="tab-content chart-tab">
         <div ref="g2ChartMountPoint" class="g2-chart-mount"></div>
         <div v-if="!hasChart" class="empty-state">
           <div class="empty-icon">📊</div>
@@ -159,6 +159,15 @@ const executeCode = (code: string) => {
         console.warn('无法提取图表数据:', dataError)
         chartData.value = []
       }
+      
+      // 提取图表数据
+      try {
+        const data = chart.options?.data || []
+        chartData.value = Array.isArray(data) ? data : []
+      } catch (dataError) {
+        console.warn('无法提取图表数据:', dataError)
+        chartData.value = []
+      }
     } else {
       throw new Error('代码必须返回一个有效的Chart实例')
     }
@@ -263,6 +272,9 @@ defineExpose({
 .tab-content {
   width: 100%;
   height: 100%;
+}
+
+.chart-tab {
   position: relative;
 }
 
@@ -304,14 +316,17 @@ defineExpose({
 }
 
 .data-preview {
-  padding: 16px;
+  padding: 0;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .data-table-container {
   height: 100%;
   display: flex;
   flex-direction: column;
+  padding: 16px;
 }
 
 .data-info {
