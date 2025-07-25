@@ -67,7 +67,12 @@ const executeCode = (code: string) => {
         
         ${code}
         
-        return chart;
+        // 确保返回chart实例
+        if (typeof chart !== 'undefined') {
+          return chart;
+        } else {
+          throw new Error('代码必须创建并返回一个chart变量');
+        }
       })
     `
 
