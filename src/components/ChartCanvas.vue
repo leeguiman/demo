@@ -2,13 +2,22 @@
   <div class="chart-canvas">
     <div class="canvas-header">
       <h3>图表预览</h3>
-      <button @click="clearCanvas" class="clear-button">
-        清空画布
-      </button>
+      <div class="header-buttons">
+        <button 
+          v-show="activeTab === 'chart' && hasChart" 
+          @click="toggleFullscreen" 
+          class="fullscreen-button"
+        >
+          {{ isFullscreen ? '退出全屏' : '全屏预览' }}
+        </button>
+        <button @click="clearCanvas" class="clear-button">
+          清空画布
+        </button>
+      </div>
     </div>
     
     <!-- 页签导航 -->
-    <div class="tab-navigation">
+    <div v-show="!isFullscreen" class="tab-navigation">
       <button 
         :class="['tab-button', { active: activeTab === 'chart' }]"
         @click="activeTab = 'chart'"
@@ -24,7 +33,7 @@
     </div>
     
     <!-- 图表预览页签 -->
-    <div class="chart-container">
+    <div :class="['chart-container', { fullscreen: isFullscreen }]">
       <div v-show="activeTab === 'chart'" class="tab-content chart-tab">
         <div ref="g2ChartMountPoint" class="g2-chart-mount"></div>
         <div v-if="!hasChart" class="empty-state">
@@ -63,7 +72,7 @@
       </div>
     </div>
     
-    <div v-if="error" class="error-message">
+    <div v-if="error && !isFullscreen" class="error-message">
       <h4>执行错误:</h4>
       <pre>{{ error }}</pre>
     </div>
@@ -80,6 +89,7 @@ const hasChart = ref(false)
 const error = ref('')
 const activeTab = ref<'chart' | 'data'>('chart')
 const chartData = ref<any[]>([])
+const isFullscreen = ref(false)
 
 let currentChart: Chart | null = null
 
@@ -109,6 +119,17 @@ const clearCanvas = () => {
   error.value = ''
   chartData.value = []
   activeTab.value = 'chart'
+}
+
+const toggleFullscreen = () => {
+  isFullscreen.value = !isFullscreen.value
+  
+  // 全屏切换后需要重新调整图表大小
+  if (currentChart) {
+    setTimeout(() => {
+      currentChart?.forceFit()
+    }, 100)
+  }
 }
 
 const executeCode = (code: string) => {
@@ -150,6 +171,11 @@ const executeCode = (code: string) => {
     if (chart && typeof chart.render === 'function') {
       currentChart = chart
       hasChart.value = true
+      
+      // 确保图表自适应容器大小
+      setTimeout(() => {
+        chart.forceFit()
+      }, 100)
       
       // 提取图表数据
       try {
@@ -229,6 +255,27 @@ defineExpose({
   font-weight: 500;
 }
 
+.header-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.fullscreen-button {
+  background: #1890ff;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.fullscreen-button:hover {
+  background: #40a9ff;
+}
+
 .clear-button {
   background: #ff4757;
   color: white;
@@ -280,6 +327,18 @@ defineExpose({
   position: relative;
 }
 
+.chart-container.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  background: #ffffff;
+  border-radius: 0;
+  border: none;
+}
+
 .tab-content {
   width: 100%;
   height: 100%;
@@ -292,9 +351,7 @@ defineExpose({
 .g2-chart-mount {
   width: 100%;
   height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
+  min-height: 300px;
 }
 
 .empty-state {
@@ -311,6 +368,10 @@ defineExpose({
   left: 0;
   width: 100%;
   z-index: 1;
+}
+
+.chart-container.fullscreen .empty-state {
+  position: fixed;
 }
 
 .empty-icon {
