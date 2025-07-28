@@ -1,28 +1,16 @@
-<template>
-  <div class="example-selector">
-    <h4>示例代码</h4>
-    <select v-model="selectedExample" @change="loadExample" class="example-select">
-      <option value="">选择一个示例...</option>
-      <option v-for="example in examples" :key="example.name" :value="example.name">
-        {{ example.name }}
-      </option>
-    </select>
-  </div>
-</template>
+import React, { useState } from 'react'
 
-<script setup lang="ts">
-import { ref } from 'vue'
+interface ExampleSelectorProps {
+  onLoadExample: (code: string) => void
+}
 
-const emit = defineEmits<{
-  'load-example': [code: string]
-}>()
+const ExampleSelector: React.FC<ExampleSelectorProps> = ({ onLoadExample }) => {
+  const [selectedExample, setSelectedExample] = useState('')
 
-const selectedExample = ref('')
-
-const examples = [
-  {
-    name: '基础柱状图',
-    code: `// 基础柱状图示例
+  const examples = [
+    {
+      name: '基础柱状图',
+      code: `// 基础柱状图示例
 const data = [
   { genre: 'Sports', sold: 275 },
   { genre: 'Strategy', sold: 115 },
@@ -48,10 +36,10 @@ chart
 chart.render();
 
 return chart;`
-  },
-  {
-    name: '折线图',
-    code: `// 折线图示例
+    },
+    {
+      name: '折线图',
+      code: `// 折线图示例
 const data = [
   { year: '1991', value: 3 },
   { year: '1992', value: 4 },
@@ -89,10 +77,10 @@ chart
 chart.render();
 
 return chart;`
-  },
-  {
-    name: '饼图',
-    code: `// 饼图示例
+    },
+    {
+      name: '饼图',
+      code: `// 饼图示例
 const data = [
   { type: 'a', value: 27 },
   { type: 'b', value: 25 },
@@ -130,10 +118,10 @@ chart
 chart.render();
 
 return chart;`
-  },
-  {
-    name: '散点图',
-    code: `// 散点图示例
+    },
+    {
+      name: '散点图',
+      code: `// 散点图示例
 const data = [
   { x: 1, y: 4.2 },
   { x: 2, y: 5.4 },
@@ -166,43 +154,31 @@ chart
 chart.render();
 
 return chart;`
+    }
+  ]
+
+  const loadExample = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const exampleName = e.target.value
+    setSelectedExample(exampleName)
+    const example = examples.find(ex => ex.name === exampleName)
+    if (example) {
+      onLoadExample(example.code)
+    }
   }
-]
 
-const loadExample = () => {
-  const example = examples.find(ex => ex.name === selectedExample.value)
-  if (example) {
-    emit('load-example', example.code)
-  }
-}
-</script>
-
-<style scoped>
-.example-selector {
-  padding: 12px 16px;
-  background: #2d2d2d;
-  border-bottom: 1px solid #404040;
-}
-
-.example-selector h4 {
-  margin: 0 0 8px 0;
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 500;
+  return (
+    <div className="example-selector">
+      <h4>示例代码</h4>
+      <select value={selectedExample} onChange={loadExample} className="example-select">
+        <option value="">选择一个示例...</option>
+        {examples.map((example) => (
+          <option key={example.name} value={example.name}>
+            {example.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
 }
 
-.example-select {
-  width: 100%;
-  padding: 6px 8px;
-  background: #1a1a1a;
-  color: #ffffff;
-  border: 1px solid #404040;
-  border-radius: 4px;
-  font-size: 12px;
-}
-
-.example-select option {
-  background: #1a1a1a;
-  color: #ffffff;
-}
-</style>
+export default ExampleSelector
